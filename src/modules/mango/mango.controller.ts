@@ -1,55 +1,48 @@
-import { Request, Response } from "express";
-import Mango from "./mango.model";
-import { mongo } from "mongoose";
+import { Request, Response } from 'express';
+import Mango from './mango.model';
+import { mongo } from 'mongoose';
+import { MangoService } from './mango.service';
+import { catchAsync } from '../../utils/catchAsync';
+import { sendResponse } from '../../utils/sendResponse';
+import AppError from '../../error/AppError';
 
-const createMango = async (req: Request, res: Response) => {
-  try {
-    const data = await Mango.create(req.body);
+const createMango = catchAsync(async (req: Request, res: Response) => {
+  const data = await MangoService.createMangoIntoDB(req.body);
 
-    res.send({
-      success: true,
-      message: "Mango Created Successfully",
-      data,
-    });
-  } catch (error) {
-    res.send({
-      success: false,
-      message: "Error Hppend",
-      error,
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: 'Mango created successfully',
+    data,
+  });
+});
 
-const getMangos = async (req: Request, res: Response) => {
-  try {
-    const data = await Mango.find();
-    res.send({
-      success: true,
-      message: "Mango getting Successfully",
-      data,
-    });
-  } catch (error) {
-    res.send({
-      success: true,
-      message: "Error",
-      error,
-    });
-  }
-};
+const getMangos = catchAsync(async (req: Request, res: Response) => {
+  throw new AppError(404, 'error');
+  const data = await Mango.find();
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Mango getting successfully',
+    data,
+  });
+});
 
 const getMangoById = async (req: Request, res: Response) => {
   try {
     const mangoId = req.params.mangoId;
-    const data = await Mango.findById(mangoId);
+    // const data = await Mango.findById(mangoId);
+    const data = await MangoService.getMangoByIdFromDB(mangoId);
     res.send({
       success: true,
-      message: "Mango getting Successfully",
+      message: 'Mango getting Successfully',
       data,
     });
   } catch (error) {
     res.send({
       success: false,
-      message: "Error",
+      message: 'Error',
       error,
     });
   }
@@ -65,13 +58,13 @@ const updateMango = async (req: Request, res: Response) => {
     });
     res.send({
       success: true,
-      message: "Mango updated Successfully",
+      message: 'Mango updated Successfully',
       data,
     });
   } catch (error) {
     res.send({
       success: false,
-      message: "Error",
+      message: 'Error',
       error,
     });
   }
@@ -83,7 +76,7 @@ const deleteMangoById = async (req: Request, res: Response) => {
   const data = await Mango.findByIdAndDelete(mangoId);
   res.send({
     success: true,
-    message: "Mango deleted Successfully",
+    message: 'Mango deleted Successfully',
     data,
   });
 };
