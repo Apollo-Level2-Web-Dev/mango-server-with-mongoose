@@ -1,9 +1,23 @@
 import { Router } from "express";
-import { getUsers, registerUser } from "./user.controller";
+import { getUsers, loginUser, registerUser } from "./user.controller";
+import { userZodSchema } from "./user.validate";
+import { validateRequest } from "../../middleware/validateRequest";
+import { auth } from "../../middleware/auth";
+import { UserRole } from "./user.constrain";
 
 const userRoute = Router();
 
-userRoute.post("/", registerUser);
-userRoute.get("/", getUsers);
+userRoute.post(
+  "/",
+
+  validateRequest(userZodSchema.userCreateZodSchema),
+  registerUser
+);
+userRoute.post(
+  "/login",
+  validateRequest(userZodSchema.userLoginZodSchema),
+  loginUser
+);
+userRoute.get("/", auth([UserRole.Admin, UserRole.Customer]), getUsers);
 
 export default userRoute;
