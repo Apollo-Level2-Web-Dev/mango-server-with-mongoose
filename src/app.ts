@@ -1,21 +1,22 @@
-import express, { Application, NextFunction, Request, Response } from 'express';
-import routes from './modules/routes';
+import express, { Application, NextFunction, Request, Response } from "express";
+import cookieParser from "cookie-parser";
+import routes from "./modules/routes";
+import { ZodError } from "zod";
+import mongoose from "mongoose";
+import { TErrorSources, TErrorSourcesResponse } from "./interfaces/error";
+import globalErrorHandler from "./middleware/globalErrorHandler";
 
 const app: Application = express();
 
 app.use(express.json());
-app.use('/api', routes);
+app.use(cookieParser());
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Server is running');
+app.use("/api", routes);
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("Server is running");
 });
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  res.status(500).json({
-    success: false,
-    message: err.message || 'Something went wrong',
-    errorDetails: err,
-  });
-});
+app.use(globalErrorHandler);
 
 export default app;

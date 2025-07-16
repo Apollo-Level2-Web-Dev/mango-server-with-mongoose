@@ -3,6 +3,7 @@ import AppError from "../error/AppError";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../modules/user/user.model";
 import { email } from "zod";
+import { IUser } from "../modules/user/user.interface";
 
 export const auth =
   (role: string[]) =>
@@ -18,6 +19,8 @@ export const auth =
 
     if (!role.includes(isVerified.role))
       throw new AppError(401, "You can't access this recourse");
+
+    req.user = isUserExist;
 
     next();
   };

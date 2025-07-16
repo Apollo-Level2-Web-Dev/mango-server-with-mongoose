@@ -18,7 +18,7 @@ const createMango = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMangos = catchAsync(async (req: Request, res: Response) => {
-  throw new AppError(404, "error");
+  // throw new AppError(404, "error");
   const data = await Mango.find();
 
   sendResponse(res, {
@@ -29,48 +29,32 @@ const getMangos = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getMangoById = async (req: Request, res: Response) => {
-  try {
-    const mangoId = req.params.mangoId;
-    // const data = await Mango.findById(mangoId);
-    const data = await MangoService.getMangoByIdFromDB(mangoId);
-    res.send({
-      success: true,
-      message: "Mango getting Successfully",
-      data,
-    });
-  } catch (error) {
-    res.send({
-      success: false,
-      message: "Error",
-      error,
-    });
-  }
-};
+const getMangoById = catchAsync(async (req, res) => {
+  const mangoId = req.params.mangoId;
+  // const data = await Mango.findById(mangoId);
+  const data = await MangoService.getMangoByIdFromDB(mangoId);
+  res.send({
+    success: true,
+    message: "Mango getting Successfully",
+    data,
+  });
+});
 
-const updateMango = async (req: Request, res: Response) => {
-  try {
-    const mangoId = req.params.mangoId;
+const updateMango = catchAsync(async (req, res) => {
+  const mangoId = req.params.mangoId;
 
-    const data = await Mango.findByIdAndUpdate(mangoId, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    res.send({
-      success: true,
-      message: "Mango updated Successfully",
-      data,
-    });
-  } catch (error) {
-    res.send({
-      success: false,
-      message: "Error",
-      error,
-    });
-  }
-};
+  const data = await Mango.findByIdAndUpdate(mangoId, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  res.send({
+    success: true,
+    message: "Mango updated Successfully",
+    data,
+  });
+});
 
-const deleteMangoById = async (req: Request, res: Response) => {
+const deleteMangoById = catchAsync(async (req, res) => {
   const mangoId = req.params.mangoId;
 
   const data = await Mango.findByIdAndDelete(mangoId);
@@ -79,7 +63,7 @@ const deleteMangoById = async (req: Request, res: Response) => {
     message: "Mango deleted Successfully",
     data,
   });
-};
+});
 
 export const mangoController = {
   createMango,
