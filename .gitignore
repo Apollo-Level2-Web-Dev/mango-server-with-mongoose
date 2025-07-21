@@ -1,7 +1,11 @@
 node_modules
-
 package-lock.json
-
+pnpm-lock.yaml
+yarn.lock
 dist
-
 .env
+.env.local
+memoryMonitor.ts
+commit_message.txt
+explanation-md
+README.md

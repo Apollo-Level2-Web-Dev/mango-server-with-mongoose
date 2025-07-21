@@ -1,47 +1,50 @@
-import { NextFunction, Request, Response } from "express";
-import { TErrorSources } from "../interfaces/error";
-import mongoose from "mongoose";
-import { ZodError } from "zod";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
+import { ErrorRequestHandler } from 'express';
+import config from '../config';
+import { handleCastValidationError } from '../error/castError';
+import { handleDuplicateValidationError } from '../error/duplicateError';
 
-const globalErrorHandler = (
-  err: any,
-  req: Request,
-  res: Response,
-  next: NextFunction
+export const globalErrorHandler: ErrorRequestHandler = (
+  error,
+  req,
+  res,
+  next
 ) => {
-  let statusCode = 500;
-  let message = "Internal Server Error";
-  let errorSources: TErrorSources[] = [];
-
-  if (err.code === 11000) {
-    const duplicate = err.message.match(/"([^"]*)"/)[1];
-    message = `${duplicate} is already exists`;
-  } else if (err instanceof mongoose.Error.CastError) {
-    message = "Invalid Mongodb ObjectId";
-  } else if (err instanceof mongoose.Error.ValidationError) {
-    const errors = Object.values(err.errors);
-
-    errors.forEach((error) => {
-      errorSources.push({
-        path: error.path,
-        message: error.message,
-      });
-    });
-  } else if (err instanceof ZodError) {
-    err.issues.forEach((issue) => {
-      errorSources.push({
-        path: issue.path[issue.path.length - 1] as string,
-        message: issue.message,
-      });
+  // Handle Cast Validation Error
+  if (error?.name === 'CastError') {
+    const result = handleCastValidationError(error);
+    return res.status(result.statusCode).json({
+      success: false,
+      message: result.message,
+      errorMessage: result.errorMessage,
+      errorDetails: result.errorDetails,
+      stack: config.node_env === 'development' ? result.stack : undefined,
     });
   }
 
-  res.status(statusCode).json({
+  // Handle Duplicate Validation Error
+  if (error.code === 11000) {
+    const result = handleDuplicateValidationError(error);
+
+    return res.status(result.statusCode).json({
+      success: false,
+      message: result.message,
+      errorMessage: result.errorMessage,
+      errorDetails: result.errorDetails,
+      stack: config.node_env === 'development' ? result.stack : undefined,
+    });
+  }
+
+  // Handle other errors
+  const statusCode = error.statusCode || 500;
+  const message = error.message || 'Something went wrong!';
+
+  return res.status(statusCode).json({
     success: false,
-    message: message,
-    error: errorSources,
-    errorDetails: err,
+    message,
+    errorMessage: error.message,
+    errorDetails: error,
+    stack: config.node_env === 'development' ? error.stack : undefined,
   });
 };
-
-export default globalErrorHandler;

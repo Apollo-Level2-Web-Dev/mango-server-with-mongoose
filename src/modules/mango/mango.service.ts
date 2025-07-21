@@ -2,7 +2,6 @@ import { IMango } from './mango.interface';
 import Mango from './mango.model';
 
 const createMangoIntoDB = async (payload: IMango) => {
-  console.log(payload);
   const data = await Mango.create(payload);
   return data;
 };

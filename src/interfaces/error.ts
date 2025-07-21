@@ -1,10 +1,9 @@
-export interface TErrorSources {
-  path: string;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type TErrorResponse = {
+  statusCode: number;
   message: string;
-}
-
-export interface TErrorSourcesResponse {
-  statusCode: string;
-  message: string;
-  error: TErrorSources[];
-}
+  errorMessage: string;
+  errorDetails: string | any;
+  error?: any;
+  stack?: string | any;
+};

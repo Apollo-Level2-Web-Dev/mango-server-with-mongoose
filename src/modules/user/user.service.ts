@@ -1,10 +1,9 @@
-import { email } from "zod";
-import AppError from "../../error/AppError";
-import { IUser } from "./user.interface";
-import User from "./user.model";
-import * as bcrypt from "bcrypt";
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
-import config from "../../config";
+import AppError from '../../error/AppError';
+import { IUser } from './user.interface';
+import User from './user.model';
+import * as bcrypt from 'bcrypt';
+import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
+import config from '../../config';
 
 const registerUser = async (payload: IUser) => {
   payload.password = await bcrypt.hash(payload.password, 10);
@@ -18,23 +17,25 @@ const registerUser = async (payload: IUser) => {
 
 const loginUser = async (payload: IUser) => {
   const isUserExist = await User.findOne({ email: payload.email });
-  if (!isUserExist) throw new AppError(404, "User Not Found");
+  if (!isUserExist) throw new AppError(404, 'User Not Found');
 
   const checkPassword = await bcrypt.compare(
     payload.password,
     isUserExist.password
   );
-  if (!checkPassword) throw new AppError(403, "Password not matched");
+  if (!checkPassword) throw new AppError(403, 'Password not matched');
 
   const jwtPayload = {
     email: payload.email,
     role: isUserExist.role,
   };
+
   const accessToken = jwt.sign(
     jwtPayload,
     config.jwt.jwt_access_secret as string,
     { expiresIn: config.jwt.jwt_access_expires } as SignOptions
   );
+
   const refreshToken = jwt.sign(
     jwtPayload,
     config.jwt.jwt_refresh_secret as string,
@@ -54,7 +55,7 @@ const refreshToken = async (refreshToken: string) => {
   ) as JwtPayload;
 
   const isUserExist = await User.findOne({ email: verifyRefreshToken.email });
-  if (!isUserExist) throw new AppError(404, "User Not Found");
+  if (!isUserExist) throw new AppError(404, 'User Not Found');
 
   const jwtPayload = {
     email: isUserExist.email,

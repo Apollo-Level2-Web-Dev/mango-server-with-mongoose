@@ -1,36 +1,30 @@
 import { Request, Response } from "express";
-import Order from "./order.model";
+import { OrderService } from "./order.service";
+import { sendResponse } from "../../utils/sendResponse";
+import httpStatus from "http-status";
+import { catchAsync } from "../../utils/catchAsync";
 
-const createOrder = async (req: Request, res: Response) => {
-  const checkStock = await Order.checkStock(
-    req.body.mango as string,
-    req.body.quantity
-  );
-  if (!checkStock) throw new Error("Insufficient Stock");
-  const order = await Order.create(req.body);
+const createOrder = catchAsync(async (req: Request, res: Response) => {
+  const order = await OrderService.createOrderIntoDB(req.body);
 
-  //   const order = new Order(req.body);
-  //   const orderStock = await order.checkStock(req.body.mango);
-  //   if (!orderStock) throw new Error("Insufficient Stock");
-
-  //   await order.save();
-
-  res.send({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
     success: true,
-    message: "Mango Ordered Successfully",
+    message: "Mango ordered successfully",
     data: order,
-  });
-};
+  })
+});
 
-const getOrders = async (req: Request, res: Response) => {
-  const order = await Order.find().populate("user").populate("mango");
+const getOrders = catchAsync(async (req: Request, res: Response) => {
+  const order = await OrderService.getOrdersFromDB();
 
-  res.send({
+    sendResponse(res, {
+    statusCode: httpStatus.OK,
     success: true,
-    message: "Mango Order getting Successfully",
+    message: "Mango order getting successfully",
     data: order,
-  });
-};
+  })
+});
 
 export const orderController = {
   createOrder,
